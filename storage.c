@@ -14,7 +14,7 @@
 */
 typedef struct {
 	int building;
-	int room;
+	int room; // room은 n*100 + m으로 표기 (n:열,층  m:column, 호수. ) 
 	int cnt;
 	char passwd[PASSWD_LEN+1];
 	
@@ -51,6 +51,12 @@ static void printStorageInside(int x, int y) {
 //and allocate memory to the context pointer
 //int x, int y : cell coordinate to be initialized
 static void initStorage(int x, int y) {
+	
+	// initialize the storage
+	 // open the file
+	 // row, column -> FILE pointer 로 읽어와서 설정.
+	// allocate memotry to the context pointer
+	context = ()malloc(sizeof) 
 	
 }
 
