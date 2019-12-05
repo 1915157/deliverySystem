@@ -3,6 +3,7 @@
 #include <string.h>
 #include "storage.h"
 
+
 /* 
   definition of storage cell structure ----
   members :
@@ -46,17 +47,27 @@ static void printStorageInside(int x, int y) {
 	printf("------------------------------------------------------------------------\n\n");
 }
 
+// 택배 꺼낼 때 혹은 처음에 보관함 생성 때 쓰도록 의도. 
 //initialize the storage
 //set all the member variable as an initial value
 //and allocate memory to the context pointer
-//int x, int y : cell coordinate to be initialized
+//int x, int y : cell coordinate to be initialized (초기화를 하고 싶은 storage의 좌표) 
 static void initStorage(int x, int y) {
 	
 	// initialize the storage
-	 // open the file
-	 // row, column -> FILE pointer 로 읽어와서 설정.
+	 // set all the memver variable as an initial value.
+	struct storage_t; 
+	
 	// allocate memotry to the context pointer
-	context = ()malloc(sizeof) 
+	char *context;
+	context = (char *)malloc(sizeof(char)); 
+	if (context == NULL){
+		printf("wrong memory allocation");
+		exit(1);
+	}
+	
+	free(context);
+		
 	
 }
 
@@ -73,24 +84,73 @@ static int inputPasswd(int x, int y) {
 
 // ------- API function for main.c file ---------------
 
+// 보관 상태가 변경될 때마다 설정파일에 새로 write(입력)함. 
 //backup the delivery system context to the file system
 //char* filepath : filepath and name to write
 //return : 0 - backup was successfully done, -1 - failed to backup
 int str_backupSystem(char* filepath) {
+	FILE *fp = NULL;
+	
+	// file open
+	// write 변경사항 in the file.
+	 //  넣었으면 파일에 추가.
+	 // 꺼냈으면 파일에서 삭제.
+	// file close 
 	
 }
 
 
-
+// initStorage함수 이용.  
 //create delivery system on the double pointer deliverySystem
 //char* filepath : filepath and name to read config parameters (row, column, master password, past contexts of the delivery system
 //return : 0 - successfully created, -1 - failed to create the system
 int str_createSystem(char* filepath) {
 	
+
+	//  filepath and name to read config parameters
+	// file open
+	FILE *fp = NULL;
+	int buliding, row, column, room, cnt;
+	char passwd[PASSWD_LEN+1];
+	char *context;
+	 
+	fp = open("char* filepath", "r");
+	if (fp == NULL)
+	 printf("can't open the file");
+	
+	
+	
+	//file read - file 값 불러오기.
+	
+	 //첫번째 줄에서 받은 2개의 숫자 값 = N, M으로 설정. 
+	while ( /* 문자*/  = fgets(fp) != EOF)
+		putchar();
+	
+	// (x,y)에 택배가 존재한다면
+	 // initStorage 초기화 = 동,룸번호, 내용을 등 매치.
+	 	
+	
+	// create delivery system on the double pointer deliverySystem
+	int i;
+	struct storage_t **deliverySystem;
+	
+	deliverySystem = (struct storage_t**)malloc(4 * sizeof (struct storage_t*));
+	for(i=0; i<3; i++)
+		deliverySystem[i] = (struct storage_t*)malloc(6 * sizeof (struct storage_t));
+	
+	 	
+	// file close	
+	fclose(fp); 
+	
 }
 
 //free the memory of the deliverySystem 
 void str_freeSystem(void) {
+	
+	int i;
+	for (i=0; i<4; i++)
+		free (deliverySystem[i]);
+	free(deliverySystem);	
 	
 }
 
