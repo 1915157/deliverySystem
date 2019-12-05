@@ -123,8 +123,10 @@ int str_createSystem(char* filepath) {
 	//file read - file 값 불러오기.
 	
 	 //첫번째 줄에서 받은 2개의 숫자 값 = N, M으로 설정. 
-	while ( /* 문자*/  = fgets(fp) != EOF)
-		putchar();
+	fscanf(fp, "%d", row);
+	
+	//while ( /* 문자*/  = fgets(fp) != EOF)
+	//	putchar();
 	
 	// (x,y)에 택배가 존재한다면
 	 // initStorage 초기화 = 동,룸번호, 내용을 등 매치.
