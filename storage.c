@@ -111,10 +111,11 @@ int str_createSystem(char* filepath) {
 	// file open
 	FILE *fp = NULL;
 	int buliding, row, column, room, cnt;
+	int N,M;
 	char passwd[PASSWD_LEN+1];
 	char *context;
 	 
-	fp = open("char* filepath", "r");
+	fp = open("char* filepath", "r"); // 이 부분 수정 필요 
 	if (fp == NULL)
 	 printf("can't open the file");
 	
@@ -123,7 +124,7 @@ int str_createSystem(char* filepath) {
 	//file read - file 값 불러오기.
 	
 	 //첫번째 줄에서 받은 2개의 숫자 값 = N, M으로 설정. 
-	fscanf(fp, "%d", row);
+	fscanf(fp, "%d %d", &N, &M);
 	
 	//while ( /* 문자*/  = fgets(fp) != EOF)
 	//	putchar();
