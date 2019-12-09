@@ -76,6 +76,13 @@ static void initStorage(int x, int y) {
 //return : 0 - password is matching, -1 - password is not matching
 static int inputPasswd(int x, int y) {
 	
+	// 비밀번호 치라고 메세지 
+	printf("input password for (%d, %d) storage : ");
+	// 비밀번호를 받음
+	// 받은 비밀번호를 해당 좌표의 비밀번호와 비교
+	 // 맞으면 0 반환
+	 // 틀리면 -1 반환 
+	
 }
 
 
@@ -95,7 +102,8 @@ int str_backupSystem(char* filepath) {
 	// write 변경사항 in the file.
 	 //  넣었으면 파일에 추가.
 	 // 꺼냈으면 파일에서 삭제.
-	// file close 
+	// file close
+	 
 	
 }
 
@@ -107,7 +115,6 @@ int str_backupSystem(char* filepath) {
 int str_createSystem(char* filepath) {
 	
 
-	//  filepath and name to read config parameters
 	// file open
 	FILE *fp = NULL;
 	int buliding, row, column, room, cnt;
@@ -115,7 +122,7 @@ int str_createSystem(char* filepath) {
 	char passwd[PASSWD_LEN+1];
 	char *context;
 	 
-	fp = open("char* filepath", "r"); // 이 부분 수정 필요 
+	fp = open(filepath, "r"); // 이 부분 수정 필요 
 	if (fp == NULL)
 	 printf("can't open the file");
 	
@@ -123,24 +130,33 @@ int str_createSystem(char* filepath) {
 	
 	//file read - file 값 불러오기.
 	
-	 //첫번째 줄에서 받은 2개의 숫자 값 = N, M으로 설정. 
-	fscanf(fp, "%d %d", &N, &M);
-	
-	//while ( /* 문자*/  = fgets(fp) != EOF)
-	//	putchar();
-	
-	// (x,y)에 택배가 존재한다면
-	 // initStorage 초기화 = 동,룸번호, 내용을 등 매치.
-	 	
+	 //첫번째 줄에서 받은 2개의 숫자 값 = N(systemSize[0]), M(systemSize[1])으로 설정. 
+	fscanf(fp, "%d %d", &systemSize[0], &systemSize[1]);
+	fscanf(fp, "%s",  masterPassword);
 	
 	// create delivery system on the double pointer deliverySystem
 	int i;
 	struct storage_t **deliverySystem;
 	
-	deliverySystem = (struct storage_t**)malloc(4 * sizeof (struct storage_t*));
-	for(i=0; i<3; i++)
-		deliverySystem[i] = (struct storage_t*)malloc(6 * sizeof (struct storage_t));
+	deliverySystem = (struct storage_t**)malloc(systemSize[0] * sizeof (struct storage_t*));
+	for(i=0; i<systemSize[0]; i++)
+		deliverySystem[i] = (struct storage_t*)malloc(systemSize[1] * sizeof (storage_t));
 	
+	// (x,y)에 택배가 존재한다면
+	 // initStorage 초기화 = 동,룸번호, 내용을 등 매치.
+	while(/* 파일끝까지 */ )
+		fscanf(fp, "%d %d %d %d %s %s", &row, &column, &deliverySystem[row][column].building, &deliverySystem[row][column].room, deliverySystem[row][column].passwd, deliverySystem[row][column].context);
+		deliverySystem[row][column].cnt++; 
+	
+	// x,y의 cnt = 0 이면 , 그 해당의 좌표 storage를 초기화. 
+	for(N=0, N<systemSize[0], N++)
+	{
+		for(M=0, M<systemSize[1], M++)
+		{
+			if (deliverySystem[N][M].cnt == 0)
+			initStorage(N,M);
+		}
+	} 
 	 	
 	// file close	
 	fclose(fp); 
@@ -151,7 +167,7 @@ int str_createSystem(char* filepath) {
 void str_freeSystem(void) {
 	
 	int i;
-	for (i=0; i<4; i++)
+	for (i=0; i<systemSize[0]; i++)
 		free (deliverySystem[i]);
 	free(deliverySystem);	
 	
@@ -165,7 +181,7 @@ void str_printStorageStatus(void) {
 	printf("----------------------------- Delivery Storage System Status (%i occupied out of %i )-----------------------------\n\n", storedCnt, systemSize[0]*systemSize[1]);
 	
 	printf("\t");
-	for (j=0;j<systemSize[1];j++)
+	for (j=0;j<systemSize[1]; j++)
 	{
 		printf(" %i\t\t",j);
 	}
@@ -216,6 +232,9 @@ int str_checkStorage(int x, int y) {
 //char passwd[] : password string (4 characters)
 //return : 0 - successfully put the package, -1 - failed to put
 int str_pushToStorage(int x, int y, int nBuilding, int nRoom, char msg[MAX_MSG_SIZE+1], char passwd[PASSWD_LEN+1]) {
+
+// 받은 변수들을 파일에 입력
+// 파일에 잘 입력했으면 0, 입력x되면 -1을 반환. 
 	
 }
 
@@ -226,7 +245,14 @@ int str_pushToStorage(int x, int y, int nBuilding, int nRoom, char msg[MAX_MSG_S
 //int x, int y : coordinate of the cell to extract
 //return : 0 - successfully extracted, -1 = failed to extract
 int str_extractStorage(int x, int y) {
+	// inputPasswd();
+	 // passwd가 틀리면 (inputPasswd = -1이면)
+	  //-1 반환 (failed to extract)
 	
+	 //passwd가 맞으면 (inputPasswd = 0이면)
+	 // 해당 좌표의 storage를 비움. (initStorage(x,y); )
+	 // printf(" ---------> extracting the storage(%d, %d) , x , y);
+	 // 0을 반환   
 }
 
 //find my package from the storage
@@ -235,5 +261,12 @@ int str_extractStorage(int x, int y) {
 //return : number of packages that the storage system has
 int str_findStorage(int nBuilding, int nRoom) {
 	
+	int cnt;	
+	// 만약 그 동과 호수에 택배가 없으면 0을 반환
+	// 만약 그 동과 호수에 택배가 있으면
+	 // 그 동과 호수에 해당되는 모든 storage를 출력
+	 // "---------------> Found a package in (x,y)" 
+	 // (위에것.. 있는 개수만큼) 
+	  
 	return cnt;
 }
