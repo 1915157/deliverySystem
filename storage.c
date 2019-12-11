@@ -160,8 +160,9 @@ int str_createSystem(char* filepath) {
 
 	// file open
 	FILE *fp = NULL;
-	int buliding, row, column, room, cnt;
+	// int buliding, row, column, room, cnt;
 	int N,M;
+	int row, column; 
 	char passwd[PASSWD_LEN+1];
 	char *context;
 	 
@@ -184,11 +185,18 @@ int str_createSystem(char* filepath) {
 	deliverySystem = (storage_t**)malloc(systemSize[0] * sizeof (storage_t*));
 	for(i=0; i<systemSize[0]; i++)
 		deliverySystem[i] = (storage_t*)malloc(systemSize[1] * sizeof (storage_t));
+		
+	for(N=0;N<systemSize[0];N++) 
+	{
+		for(M=0;M<systemSize[1];M++)
+			deliverySystem[N][M].context = (char *)malloc(10 * sizeof(char));
+	} 
 	
 	// (x,y)에 택배가 존재한다면
 	 // initStorage 초기화 = 동,룸번호, 내용을 등 매치.
-	while( !feof(fp) ) // 파일끝까지 ------------------------------------> 수정필요 
+	while( feof(fp) != 0 ) // 파일끝까지 ------------------------------------> 수정필요 
 	{
+		// 한 열에 대해서만 받을 수도 있음 (row, column때문에) 
 		fscanf(fp, "%d %d %d %d %s %s", &row, &column, &deliverySystem[row][column].building, &deliverySystem[row][column].room, deliverySystem[row][column].passwd, deliverySystem[row][column].context);
 		deliverySystem[row][column].cnt++; 
 		storedCnt++;
@@ -311,7 +319,7 @@ int str_extractStorage(int x, int y) {
 		initStorage(x,y);
 		deliverySystem[x][y].cnt--;
 		storedCnt--;
-		printf("-------> extracting the storage (%d %d)\n", x, y);
+		printf("-------> extracting the storage (%d, %d)\n", x, y);
 		return 0;
 	}
 	 //passwd가 맞으면 (inputPasswd = 0이면)
