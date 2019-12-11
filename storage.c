@@ -219,11 +219,17 @@ int str_createSystem(char* filepath) {
 //free the memory of the deliverySystem 
 void str_freeSystem(void) {
 	
-	int i;
+	int i,j;
+	
 	for (i=0; i<systemSize[0]; i++)
 		free (deliverySystem[i]);
 	free(deliverySystem);	
 	
+	for (i=0; i<systemSize[0]; i++)
+		free(deliverySystem[i].context);
+	free(deliverySystem.context);
+	
+
 }
 
 
