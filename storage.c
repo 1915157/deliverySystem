@@ -187,7 +187,7 @@ int str_createSystem(char* filepath) {
 	
 	// (x,y)에 택배가 존재한다면
 	 // initStorage 초기화 = 동,룸번호, 내용을 등 매치.
-	while( !feof(fp) ) // 파일끝까지 
+	while( !feof(fp) ) // 파일끝까지 ------------------------------------> 수정필요 
 	{
 		fscanf(fp, "%d %d %d %d %s %s", &row, &column, &deliverySystem[row][column].building, &deliverySystem[row][column].room, deliverySystem[row][column].passwd, deliverySystem[row][column].context);
 		deliverySystem[row][column].cnt++; 
@@ -280,7 +280,7 @@ int str_pushToStorage(int x, int y, int nBuilding, int nRoom, char msg[MAX_MSG_S
 
 // 받은 변수들을 파일에 입력
 // 파일에 잘 입력했으면 0, 입력x되면 -1을 반환. 
-if (/* 입력 x되는 조건 */)
+if (str_checkStorage(x,y) != 0 || buildingValidityCheck(nBuilding, nRoom) != 0)
 	return -1;
 else 
 {
@@ -309,7 +309,7 @@ int str_extractStorage(int x, int y) {
 	else if (inputPasswd(x,y) == 0)
 	{
 		initStorage(x,y);
-		deliverySystem.cnt--;
+		deliverySystem[x][y].cnt--;
 		storedCnt--;
 		printf("-------> extracting the storage (%d %d)\n", x, y);
 		return 0;
@@ -327,8 +327,21 @@ int str_extractStorage(int x, int y) {
 //return : number of packages that the storage system has
 int str_findStorage(int nBuilding, int nRoom) {
 	
-	int cnt;	
+	int cnt = 0;	
 	// 만약 txt파일에 그 동과 호수에 택배가 없으면 0을 반환
+	int x,y;
+	
+	for(x=0; x<systemSize[0]; x++)
+	{
+		for(y=0; y<systemSize[1]; y++)
+		{
+			if (deliverySystem[x][y].building == nBuilding && deliverySystem[x][y].room == nRoom)
+			{
+				printf("---------------------> Found a package in (%d,%d)\n", x, y);
+				cnt++;
+			}
+		}	
+	} 
 	// 만약 그 동과 호수에 택배가 있으면
 	 // 그 동과 호수에 해당되는 모든 storage를 출력
 	 // "---------------> Found a package in (x,y)" 
