@@ -278,7 +278,6 @@ int str_pushToStorage(int x, int y, int nBuilding, int nRoom, char msg[MAX_MSG_S
 	// regulate(reset up) size of context pointer memory allocation  
 	deliverySystem[x][y].context = (char*)malloc(strlen(msg) * sizeof(char));
 
-// 파일에 잘 입력했으면 0, 입력x되면 -1을 반환.
 	// failed to put (context doesn't exist in the memory ), then return -1
 	if (deliverySystem[x][y].context == NULL)
 		return -1;
@@ -327,7 +326,6 @@ int str_extractStorage(int x, int y) {
 int str_findStorage(int nBuilding, int nRoom) {
 	
 	int cnt = 0;	// variable that means number of package in certain row, column. initialize number of package.
-	// 만약 txt파일에 그 동과 호수에 택배가 없으면 0을 반환
 	int x,y; // variable for repeat and it is related with row, column
 	
 	// if the number of package in that building and room exists, then inform where is their package of the deliverySystem 
