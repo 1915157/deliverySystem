@@ -15,7 +15,7 @@
 */
 typedef struct {
 	int building;
-	int room; // room은 n*100 + m으로 표기 (n:열,층  m:column, 호수. ) 
+	int room; 
 	int cnt;
 	char passwd[PASSWD_LEN+1];
 	
@@ -28,7 +28,7 @@ static int storedCnt = 0;					//number of cells occupied
 static int systemSize[2] = {0, 0};  		//row/column of the delivery system
 static char masterPassword[PASSWD_LEN+1];	//master password
 
-extern int getIntegerInput(void);
+extern int getIntegerInput(void); 
 
 // ------- inner functions ---------------
 
@@ -46,43 +46,18 @@ static void printStorageInside(int x, int y) {
 	printf("------------------------------------------------------------------------\n\n");
 }
 
-// 택배 꺼낼 때 혹은 처음에 보관함 생성 때 쓰도록 의도. 
 //initialize the storage
 //set all the member variable as an initial value
 //and allocate memory to the context pointer
-//int x, int y : cell coordinate to be initialized (초기화를 하고 싶은 storage의 좌표) 
+//int x, int y : cell coordinate to be initialized 
 static void initStorage(int x, int y) {
 	
-	// initialize the storage
-	 // set all the memver variable as an initial value.
-	
+	// initialize the storage - set all the member variable as an initial value.
 	deliverySystem[x][y].building = 0;
 	deliverySystem[x][y].cnt = 0;
 	deliverySystem[x][y].context = 0;
 	deliverySystem[x][y].room = 0;
 	deliverySystem[x][y].passwd[0] = 0;
-	
-	/*
-	// allocate memotry to the context pointer
-	char *context;
-	context = (char *)malloc(sizeof(char)); // 택배를 넣을 때 혹은 설정파일에서 읽어올 때 알게된 길이를 곱해야함. 
-	if (context == NULL)
-	{
-		printf("wrong memory allocation");
-		exit(1);
-	}
-	
-		free(context);
-	*/
-	
-	/*
-	for(i=0;i<systemSize[0];i++) 
-	{
-		for(j=0;j<systemSize[1];j++)
-			deliverySystem[i][j].context = (char *)malloc(100 * sizeof(char));
-	} 
-	*/
-	
 	
 }
 
@@ -91,18 +66,13 @@ static void initStorage(int x, int y) {
 //return : 0 - password is matching, -1 - password is not matching
 static int inputPasswd(int x, int y) {
 	
-	char getPasswd[PASSWD_LEN+1];
-	
-	// 비밀번호 치라고 메세지 
+	char getPasswd[PASSWD_LEN+1]; // variable that gets passwd of that coordinate 
 	getPasswd[0] = 0;
-	printf("input password for (%d, %d) storage : \n", x, y);
-	// 비밀번호를 받음
+	printf("input password for (%d, %d) storage : \n", x, y);	// message to user to get password for (x,y)
 	scanf("%4s", getPasswd);
 	fflush(stdin);
 	
-	// 받은 비밀번호를 해당 좌표의 비밀번호와 비교
-	 // 맞으면 0 반환
-	 // 틀리면 -1 반환
+	//compare getpasswd with password for that coordinate ( wrong - return -1, success - return 0)
 	if (strcmp(getPasswd,deliverySystem[x][y].passwd) == 0 || strcmp(getPasswd,masterPassword) == 0)
 		return 0;
 	else
@@ -115,22 +85,20 @@ static int inputPasswd(int x, int y) {
 
 
 // ------- API function for main.c file ---------------
-
-// 보관 상태가 변경될 때마다 설정파일에 새로 write(입력)함. 
+ 
 //backup the delivery system context to the file system
 //char* filepath : filepath and name to write
 //return : 0 - backup was successfully done, -1 - failed to backup
 int str_backupSystem(char* filepath) {
 	
-	int x, y;
+	int x, y; // coordinate to repeat
 	
 	FILE *fp = NULL;
 	
+	//file open to write 
 	fp = fopen(filepath, "w");
 	 
-	// file open
-	// write 변경사항 in the file.
-	
+	// write all of things in the file.
 	fprintf("%d %d\n", systemSize[0], systemSize[1]);
 	fprintf("%s\n", masterPassword);
 	
@@ -138,7 +106,7 @@ int str_backupSystem(char* filepath) {
 	{
 		for (y=0; y<systemSize[1]; y++)
 		{
-			if (deliverySystem[x][y].cnt > 0)
+			if (deliverySystem[x][y].cnt > 0) // if package exists in that coordinate
 			{
 				fprintf("%d %d %d %d %s %s", &x, &y, &deliverySystem[x][y].building, &deliverySystem[x][y].room, deliverySystem[x][y].passwd, deliverySystem[x][y].context);
 			}
@@ -151,50 +119,56 @@ int str_backupSystem(char* filepath) {
 }
 
 
-// initStorage함수 이용.  
 //create delivery system on the double pointer deliverySystem
 //char* filepath : filepath and name to read config parameters (row, column, master password, past contexts of the delivery system
 //return : 0 - successfully created, -1 - failed to create the system
 int str_createSystem(char* filepath) {
 	
-
-	// file open
-	FILE *fp = NULL;
-	// int buliding, row, column, room, cnt;
+	// variable settings
 	int N,M;
+	int i; // variable for repeat
 	int row, column; 
 	char passwd[PASSWD_LEN+1];
 	char *context;
+	
+	// file open
+	FILE *fp = NULL;
 	 
 	fp = fopen(filepath, "r");
 	if (fp == NULL)
 	 printf("can't open the file");
 	
 	
-	
-	//file read - file 값 불러오기.
-	
-	 //첫번째 줄에서 받은 2개의 숫자 값 = N(systemSize[0]), M(systemSize[1])으로 설정. 
+	//get two numbers (row of deliverySystem and column of deliverySystem) in the file at the first line
 	fscanf(fp, "%d %d", &systemSize[0], &systemSize[1]);
+	// get masterPassword from the file at the second line
 	fscanf(fp, "%s",  masterPassword);
 	
 	// create delivery system on the double pointer deliverySystem
-	int i;
-	//struct storage_t **deliverySystem;
-	
 	deliverySystem = (storage_t**)malloc(systemSize[0] * sizeof (storage_t*));
 	for(i=0; i<systemSize[0]; i++)
 		deliverySystem[i] = (storage_t*)malloc(systemSize[1] * sizeof (storage_t));
-		
+	
+	// 	
 	for(N=0;N<systemSize[0];N++) 
 	{
 		for(M=0;M<systemSize[1];M++)
 			deliverySystem[N][M].context = (char *)malloc(10 * sizeof(char));
 	} 
 	
+	for(N=0; N<systemSize[0]; N++)
+	{
+		for(M=0; M<systemSize[1]; M++)
+		{
+			deliverySystem[N][M].cnt =0;
+			
+		}
+	} 
+	 	
+	
 	// (x,y)에 택배가 존재한다면
 	 // initStorage 초기화 = 동,룸번호, 내용을 등 매치.
-	while( feof(fp) != 0 ) // 파일끝까지 ------------------------------------> 수정필요 
+	while( fscanf(fp, "%d %d", &row, &column) == 2 ) // 파일끝까지 ------------------------------------> 수정필요 
 	{
 		// 한 열에 대해서만 받을 수도 있음 (row, column때문에) 
 		fscanf(fp, "%d %d %d %d %s %s", &row, &column, &deliverySystem[row][column].building, &deliverySystem[row][column].room, deliverySystem[row][column].passwd, deliverySystem[row][column].context);
@@ -219,16 +193,18 @@ int str_createSystem(char* filepath) {
 //free the memory of the deliverySystem 
 void str_freeSystem(void) {
 	
-	int i;
+	int i,j;
 	
 	for (i=0; i<systemSize[0]; i++)
 		free (deliverySystem[i]);
 	free(deliverySystem);	
 	
+	/*
 	for (i=0; i<systemSize[0]; i++)
 		free(deliverySystem[i].context);
 	free(deliverySystem.context);
-	
+	*/
+	// free(deliverySystem.context);
 
 }
 
