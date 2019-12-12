@@ -48,7 +48,6 @@ static void printStorageInside(int x, int y) {
 
 //initialize the storage
 //set all the member variable as an initial value
-//and allocate memory to the context pointer
 //int x, int y : cell coordinate to be initialized 
 static void initStorage(int x, int y) {
 	
@@ -99,8 +98,7 @@ int str_backupSystem(char* filepath) {
 	fp = fopen(filepath, "w");
 	 
 	// write all of things in the file.
-	fprintf("%d %d\n", systemSize[0], systemSize[1]);
-	fprintf("%s\n", masterPassword);
+	fprintf("%d %d\n %s\n", systemSize[0], systemSize[1], masterPassword);
 	
 	for(x=0; x<systemSize[0]; x++)
 	{
@@ -149,13 +147,15 @@ int str_createSystem(char* filepath) {
 	for(i=0; i<systemSize[0]; i++)
 		deliverySystem[i] = (storage_t*)malloc(systemSize[1] * sizeof (storage_t));
 	
-	// 	
+	// allocate memory to the context pointer
+
 	for(N=0;N<systemSize[0];N++) 
 	{
 		for(M=0;M<systemSize[1];M++)
-			deliverySystem[N][M].context = (char *)malloc(10 * sizeof(char));
+			deliverySystem[N][M].context = (char *)malloc(100 * sizeof(char));
 	} 
 	
+	// initialize cnt of deliverySystem on all 
 	for(N=0; N<systemSize[0]; N++)
 	{
 		for(M=0; M<systemSize[1]; M++)
@@ -171,7 +171,7 @@ int str_createSystem(char* filepath) {
 	while( fscanf(fp, "%d %d", &row, &column) == 2 ) // 파일끝까지 ------------------------------------> 수정필요 
 	{
 		// 한 열에 대해서만 받을 수도 있음 (row, column때문에) 
-		fscanf(fp, "%d %d %d %d %s %s", &row, &column, &deliverySystem[row][column].building, &deliverySystem[row][column].room, deliverySystem[row][column].passwd, deliverySystem[row][column].context);
+		fscanf(fp, " %d %d %s %s", &deliverySystem[row][column].building, &deliverySystem[row][column].room, deliverySystem[row][column].passwd, deliverySystem[row][column].context);
 		deliverySystem[row][column].cnt++; 
 		storedCnt++;
 	}
@@ -268,9 +268,22 @@ int str_checkStorage(int x, int y) {
 //return : 0 - successfully put the package, -1 - failed to put
 int str_pushToStorage(int x, int y, int nBuilding, int nRoom, char msg[MAX_MSG_SIZE+1], char passwd[PASSWD_LEN+1]) {
 
-// 받은 변수들을 파일에 입력
+	int i;
+
+// 받은 변수들을 메모리에 입력
+	deliverySystem[x][y].building = nBuilding;
+	deliverySystem[x][y].room = nRoom;
+	deliverySystem[x][y].context = msg;
+	
+	for(i=0; i<PASSWD_LEN+1; i++)
+		deliverySystem[x][y].passwd[i] = passwd[i];
+
+
+// 받은 메세지에 대한 메모리 할당 크기 조절 
+	deliverySystem[x][y].context = (char*)malloc(strlen(msg) * sizeof(char));
+
 // 파일에 잘 입력했으면 0, 입력x되면 -1을 반환. 
-if (str_checkStorage(x,y) != 0 || buildingValidityCheck(nBuilding, nRoom) != 0)
+if (deliverySystem[x][y].context == 0)
 	return -1;
 else 
 {
@@ -298,6 +311,8 @@ int str_extractStorage(int x, int y) {
 	
 	else if (inputPasswd(x,y) == 0)
 	{
+		free(deliverySystem[x][y].context);
+
 		initStorage(x,y);
 		deliverySystem[x][y].cnt--;
 		storedCnt--;
