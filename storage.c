@@ -54,7 +54,7 @@ static void initStorage(int x, int y) {
 	// initialize the storage - set all the member variable as an initial value.
 	deliverySystem[x][y].building = 0;
 	deliverySystem[x][y].cnt = 0;
-	deliverySystem[x][y].context = 0;
+	deliverySystem[x][y].context = NULL;
 	deliverySystem[x][y].room = 0;
 	deliverySystem[x][y].passwd[0] = 0;
 	
@@ -66,14 +66,16 @@ static void initStorage(int x, int y) {
 static int inputPasswd(int x, int y) {
 	
 	char getPasswd[PASSWD_LEN+1]; // variable that gets passwd of that coordinate 
-	getPasswd[0] = 0;
-	printf("input password for (%d, %d) storage : \n", x, y);	// message to user to get password for (x,y)
+	
+	// message to user to get password for (x,y) and get the password.
+	printf("input password for (%d, %d) storage : \n", x, y);	
 	scanf("%4s", getPasswd);
 	fflush(stdin);
 	
 	//compare getpasswd with password for that coordinate ( wrong - return -1, success - return 0)
 	if (strcmp(getPasswd,deliverySystem[x][y].passwd) == 0 || strcmp(getPasswd,masterPassword) == 0)
 		return 0;
+	
 	else
 		return -1; 
 	
@@ -97,16 +99,17 @@ int str_backupSystem(char* filepath) {
 	//file open to write 
 	fp = fopen(filepath, "w");
 	 
-	// write all of things in the file.
-	fprintf("%d %d\n %s\n", systemSize[0], systemSize[1], masterPassword);
+	// write row, column, masterpassword in the file.
+	fprintf(fp,"%d %d\n%s\n", systemSize[0], systemSize[1], masterPassword);
 	
+	// if package exists in that coordinate, print informaiton of that package in the file and save in the file.
 	for(x=0; x<systemSize[0]; x++)
 	{
 		for (y=0; y<systemSize[1]; y++)
 		{
-			if (deliverySystem[x][y].cnt > 0) // if package exists in that coordinate
+			if (deliverySystem[x][y].cnt > 0) 
 			{
-				fprintf("%d %d %d %d %s %s", &x, &y, &deliverySystem[x][y].building, &deliverySystem[x][y].room, deliverySystem[x][y].passwd, deliverySystem[x][y].context);
+				fprintf(fp,"%d  %d  %d  %d  %s  %s \n", x, y, deliverySystem[x][y].building, deliverySystem[x][y].room, deliverySystem[x][y].passwd, deliverySystem[x][y].context);
 			}
 		}
 	}
@@ -123,39 +126,41 @@ int str_backupSystem(char* filepath) {
 int str_createSystem(char* filepath) {
 	
 	// variable settings
-	int N,M;
+	int N,M; // variable for repeat (and it is related with row and column)
 	int i; // variable for repeat
-	int row, column; 
-	char passwd[PASSWD_LEN+1];
+	int row = 0; // row getting from scanf
+	int column = 0; // column getting from scanf
+	char passwd[PASSWD_LEN+1]; 
 	char *context;
 	
-	// file open
+	// file open to read 
 	FILE *fp = NULL;
 	 
 	fp = fopen(filepath, "r");
-	if (fp == NULL)
+	if (fp == NULL)	// if fail to open that file, inform to user.
 	 printf("can't open the file");
-	
 	
 	//get two numbers (row of deliverySystem and column of deliverySystem) in the file at the first line
 	fscanf(fp, "%d %d", &systemSize[0], &systemSize[1]);
+	
 	// get masterPassword from the file at the second line
 	fscanf(fp, "%s",  masterPassword);
 	
-	// create delivery system on the double pointer deliverySystem
+	// ------------------------- create delivery system on the double pointer deliverySystem
+	
 	deliverySystem = (storage_t**)malloc(systemSize[0] * sizeof (storage_t*));
 	for(i=0; i<systemSize[0]; i++)
 		deliverySystem[i] = (storage_t*)malloc(systemSize[1] * sizeof (storage_t));
 	
-	// allocate memory to the context pointer
+	// --------------------- allocate memory to the context pointer
 
 	for(N=0;N<systemSize[0];N++) 
 	{
 		for(M=0;M<systemSize[1];M++)
 			deliverySystem[N][M].context = (char *)malloc(100 * sizeof(char));
-	} 
+	}
 	
-	// initialize cnt of deliverySystem on all 
+	// ---------------------- initialize number of all deliverySystem's package 
 	for(N=0; N<systemSize[0]; N++)
 	{
 		for(M=0; M<systemSize[1]; M++)
@@ -166,16 +171,15 @@ int str_createSystem(char* filepath) {
 	} 
 	 	
 	
-	// (x,y)에 택배가 존재한다면
-	 // initStorage 초기화 = 동,룸번호, 내용을 등 매치.
-	while( fscanf(fp, "%d %d", &row, &column) == 2 ) // 파일끝까지 ------------------------------------> 수정필요 
-	{
-		// 한 열에 대해서만 받을 수도 있음 (row, column때문에) 
-		fscanf(fp, " %d %d %s %s", &deliverySystem[row][column].building, &deliverySystem[row][column].room, deliverySystem[row][column].passwd, deliverySystem[row][column].context);
-		deliverySystem[row][column].cnt++; 
-		storedCnt++;
+	// scan of the file until read all of them. 	
+	while( fscanf(fp, "%d %d", &row, &column) == 2 ) 
+	{ 
+		fscanf(fp, "%d %d %s %s", &deliverySystem[row][column].building, &deliverySystem[row][column].room, deliverySystem[row][column].passwd, deliverySystem[row][column].context);
+		deliverySystem[row][column].cnt++; // if the delivery exists in that coordinate, plus cnt of that coordinate 
+		storedCnt++; // if the delivery exists, plus stored Cnt
 	}
-	// x,y의 cnt = 0 이면 , 그 해당의 좌표 storage를 초기화. 
+	
+	// initialize number of deliverysystem if there's no package on certain coordinate.  
 	for(N=0; N<systemSize[0]; N++)
 	{
 		for(M=0; M<systemSize[1]; M++)
@@ -193,18 +197,11 @@ int str_createSystem(char* filepath) {
 //free the memory of the deliverySystem 
 void str_freeSystem(void) {
 	
-	int i,j;
+	int i; // variable for repeat
 	
 	for (i=0; i<systemSize[0]; i++)
 		free (deliverySystem[i]);
 	free(deliverySystem);	
-	
-	/*
-	for (i=0; i<systemSize[0]; i++)
-		free(deliverySystem[i].context);
-	free(deliverySystem.context);
-	*/
-	// free(deliverySystem.context);
 
 }
 
@@ -268,9 +265,9 @@ int str_checkStorage(int x, int y) {
 //return : 0 - successfully put the package, -1 - failed to put
 int str_pushToStorage(int x, int y, int nBuilding, int nRoom, char msg[MAX_MSG_SIZE+1], char passwd[PASSWD_LEN+1]) {
 
-	int i;
+	int i; // variable for repeat.
 
-// 받은 변수들을 메모리에 입력
+// ---------------- put the bulding, room, message, password of certain coordinate in the memory. 
 	deliverySystem[x][y].building = nBuilding;
 	deliverySystem[x][y].room = nRoom;
 	deliverySystem[x][y].context = msg;
@@ -278,20 +275,22 @@ int str_pushToStorage(int x, int y, int nBuilding, int nRoom, char msg[MAX_MSG_S
 	for(i=0; i<PASSWD_LEN+1; i++)
 		deliverySystem[x][y].passwd[i] = passwd[i];
 
-
-// 받은 메세지에 대한 메모리 할당 크기 조절 
+	// regulate(reset up) size of context pointer memory allocation  
 	deliverySystem[x][y].context = (char*)malloc(strlen(msg) * sizeof(char));
 
-// 파일에 잘 입력했으면 0, 입력x되면 -1을 반환. 
-if (deliverySystem[x][y].context == 0)
-	return -1;
-else 
-{
-	deliverySystem[x][y].cnt++;
-	storedCnt++;
-	return 0;
- } 
-// storedCnt++;
+// 파일에 잘 입력했으면 0, 입력x되면 -1을 반환.
+	// failed to put (context doesn't exist in the memory ), then return -1
+	if (deliverySystem[x][y].context == NULL)
+		return -1;
+	
+	// success to put package, then return 0 
+	else 
+	{
+		deliverySystem[x][y].cnt++; // plus number of package in the coordinate
+		storedCnt++;
+		return 0;
+ 	}	 
+
 	
 }
 
@@ -303,15 +302,10 @@ else
 //return : 0 - successfully extracted, -1 = failed to extract
 int str_extractStorage(int x, int y) {
 	
-	inputPasswd(x,y);
-	if (inputPasswd(x,y) == -1)
-		return -1;
-	 // passwd가 틀리면 (inputPasswd = -1이면)
-	  //-1 반환 (failed to extract)
-	
-	else if (inputPasswd(x,y) == 0)
+	// if password is right, extract package (initStorage), and return 0
+	if (inputPasswd(x,y) == 0)
 	{
-		free(deliverySystem[x][y].context);
+		// free(deliverySystem[x][y].context);
 
 		initStorage(x,y);
 		deliverySystem[x][y].cnt--;
@@ -319,11 +313,11 @@ int str_extractStorage(int x, int y) {
 		printf("-------> extracting the storage (%d, %d)\n", x, y);
 		return 0;
 	}
-	 //passwd가 맞으면 (inputPasswd = 0이면)
-	 // 해당 좌표의 storage를 비움. (initStorage(x,y); )
-	 // storedCnt--; (1 감소시킴) 
-	 // printf(" ---------> extracting the storage(%d, %d) , x , y);
-	 // 0을 반환   
+	
+	// if password is wrong, return -1
+	else if (inputPasswd(x,y) == -1)
+		return -1;
+  
 }
 
 //find my package from the storage
@@ -332,10 +326,11 @@ int str_extractStorage(int x, int y) {
 //return : number of packages that the storage system has
 int str_findStorage(int nBuilding, int nRoom) {
 	
-	int cnt = 0;	
+	int cnt = 0;	// variable that means number of package in certain row, column. initialize number of package.
 	// 만약 txt파일에 그 동과 호수에 택배가 없으면 0을 반환
-	int x,y;
+	int x,y; // variable for repeat and it is related with row, column
 	
+	// if the number of package in that building and room exists, then inform where is their package of the deliverySystem 
 	for(x=0; x<systemSize[0]; x++)
 	{
 		for(y=0; y<systemSize[1]; y++)
@@ -347,10 +342,6 @@ int str_findStorage(int nBuilding, int nRoom) {
 			}
 		}	
 	} 
-	// 만약 그 동과 호수에 택배가 있으면
-	 // 그 동과 호수에 해당되는 모든 storage를 출력
-	 // "---------------> Found a package in (x,y)" 
-	 // (위에것.. 있는 개수만큼) 
-	  
+
 	return cnt;
 }
